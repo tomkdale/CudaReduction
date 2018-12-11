@@ -6,8 +6,8 @@
 #include <iostream>
 #include <random>
 using namespace std;
-#define N 100//number of input values
-#define R 20//reduction factor
+#define N 100000//number of input values
+#define R 100//reduction factor
 #define F (1+((N-1)/R))//how many values will be in the final output
 
 
@@ -31,8 +31,8 @@ int main(){
     a = (double*)malloc(sizeof(double)*N);
     z = (double*)malloc(sizeof(double)*F);
     for(int i =0;i< N;i++){//set a to random values
-        a[i]= rand() % 10;
-        //a[i] = i;
+        //a[i]= rand() % 10;
+        a[i] = i;
     }
 
     for(int i = 0;i<(N%R);i++){//wrap around buffer. a will be extended to be evenly split by R.
@@ -48,20 +48,31 @@ int main(){
     cudaMalloc((void**)&dev_a,sizeof(double)*bufferedSize);
     cudaMalloc((void**)&dev_z,sizeof(double)*F);
 
-    cudaMemcpy(dev_a,a,sizeof(double)*bufferedSize,cudaMemcpyHostToDevice);
 
-
-    int gridSize =100;//number of blocks per grid remeber, should be 1 dimension
     int blockSize = 1024 ;//number of threads per block
+    int gridSize =1+(bufferedSize-1)/blockSize;//number of blocks per grid remeber, should be 1 dimension
+
+     cudaEvent_t start,stop;//create clock variables
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    cudaEventRecord(start);//start clock
+    cudaMemcpy(dev_a,a,sizeof(double)*bufferedSize,cudaMemcpyHostToDevice);
     basicRun<<<gridSize,blockSize>>>(dev_a,dev_z);
+    cudaEventRecord(stop);//end clock
+
 
     cudaMemcpy(z,dev_z,sizeof(double)*F,cudaMemcpyDeviceToHost);
 
 
-    for(int i =0;i< F;i++){//output final reduced values
-        cout << z[i] << " ";
-    }
+    // for(int i =0;i< F;i++){//output final reduced values
+    //     cout << z[i] << " ";
+    // }
+
+    cout << endl << endl << gridSize << " blocks used to reduce " << N << " by  " << R << " to get " << F << " values"<< endl;
     
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds,start,stop);
+    cout << "This run took " << milliseconds << " miliseconds to compute." << endl;
 
     cudaFree(dev_a);
     cudaFree(dev_z);

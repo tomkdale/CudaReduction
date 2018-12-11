@@ -5,8 +5,8 @@ using namespace std;
 //This implementation is a binaryReduction algorithm meaning that it will buffer out values to a power of 2.
 //This is version 2.0, will work any sized 
 
-#define N 20000//number of input values
-#define R 2//reduction factor
+#define N 100000//number of input values
+#define R 100//reduction factor
 #define F (1+((N-1)/R))//final value is ceiling of N/R
 
 //powerTwo will use every thread to sum two values, then use half of those to sum those values, and so on until sizeOut is reached. 
@@ -77,10 +77,10 @@ int main(){
         a[N+i] =a[i];//added buffer values will be equal to first few variables in the array as stated in problem
     }
     //Uncomment to print input values
-    for(int i =0;i< bufferedA;i++){//print values to screen
-        cout << a[i] << " ";
-    }
-    cout << endl;
+    // for(int i =0;i< bufferedA;i++){//print values to screen
+    //     cout << a[i] << " ";
+    // }
+    // cout << endl;
     
     double *dev_a,*dev_z;//create device side variables
     cudaMalloc((void**)&dev_a,sizeof(double)*bufferedA);
@@ -99,11 +99,10 @@ int main(){
     
     cout << endl;
     //Uncomment to print output array
-    cout << "Reduced Array:" <<endl;
-    for(int i =0;i< F;i++){//output final reduced values
-        if(i % outputsPerBlock == 0) cout << "|";
-        cout << z[i] << " ";
-    }
+    // cout << "Reduced Array:" <<endl;
+    // for(int i =0;i< F;i++){//output final reduced values
+    //     cout << z[i] << " ";
+    // }
     cout << endl << endl << blocksPerGrid << " blocks used to reduce " << N << " by  " << R << " to get " << F << " values"<< endl;
     
     float milliseconds = 0;
