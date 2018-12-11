@@ -76,11 +76,11 @@ int main(){
     for(int i = 0;i<bufferSizeA;i++){//wrap around buffer. 
         a[N+i] =a[i];//added buffer values will be equal to first few variables in the array as stated in problem
     }
-    ////Uncomment to print input values
-    // for(int i =0;i< bufferedA;i++){//print values to screen
-    //     cout << a[i] << " ";
-    // }
-    // cout << endl;
+    //Uncomment to print input values
+    for(int i =0;i< bufferedA;i++){//print values to screen
+        cout << a[i] << " ";
+    }
+    cout << endl;
     
     double *dev_a,*dev_z;//create device side variables
     cudaMalloc((void**)&dev_a,sizeof(double)*bufferedA);
@@ -98,12 +98,12 @@ int main(){
     cudaMemcpy(z,dev_z,sizeof(double)*F,cudaMemcpyDeviceToHost);//copy the final amount of results back
     
     cout << endl;
-    ////Uncomment to print output array
-    //cout << "Reduced Array:" <<endl;
-    // for(int i =0;i< F;i++){//output final reduced values
-    //     if(i % outputsPerBlock == 0) cout << "|";
-    //     cout << z[i] << " ";
-    // }
+    //Uncomment to print output array
+    cout << "Reduced Array:" <<endl;
+    for(int i =0;i< F;i++){//output final reduced values
+        if(i % outputsPerBlock == 0) cout << "|";
+        cout << z[i] << " ";
+    }
     cout << endl << endl << blocksPerGrid << " blocks used to reduce " << N << " by  " << R << " to get " << F << " values"<< endl;
     
     float milliseconds = 0;

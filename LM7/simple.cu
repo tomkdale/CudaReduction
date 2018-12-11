@@ -6,9 +6,9 @@
 #include <iostream>
 #include <random>
 using namespace std;
-#define N 20000//number of input values
-#define R 2//reduction factor
-#define F N/R//how many values will be in the final output
+#define N 100//number of input values
+#define R 20//reduction factor
+#define F (1+((N-1)/R))//how many values will be in the final output
 
 
 //basicRun will F number of threads go through R number of values and put the average in z[tid]
@@ -32,16 +32,17 @@ int main(){
     z = (double*)malloc(sizeof(double)*F);
     for(int i =0;i< N;i++){//set a to random values
         a[i]= rand() % 10;
+        //a[i] = i;
     }
 
     for(int i = 0;i<(N%R);i++){//wrap around buffer. a will be extended to be evenly split by R.
         a[N+i] =a[i];//added buffer values will be equal to first few variables in the array as stated in problem
     }
 
-    for(int i =0;i< bufferedSize;i++){//print values to screen
-        cout << a[i] << " ";
-    }
-    cout << endl;
+    // for(int i =0;i< bufferedSize;i++){//print values to screen
+    //     cout << a[i] << " ";
+    // }
+    // cout << endl;
     
     double *dev_a,*dev_z;//create device side variables
     cudaMalloc((void**)&dev_a,sizeof(double)*bufferedSize);
@@ -50,8 +51,8 @@ int main(){
     cudaMemcpy(dev_a,a,sizeof(double)*bufferedSize,cudaMemcpyHostToDevice);
 
 
-    dim3 gridSize(100);//number of blocks per grid remeber, should be 1 dimension
-    dim3 blockSize(16);//number of threads per block
+    int gridSize =100;//number of blocks per grid remeber, should be 1 dimension
+    int blockSize = 1024 ;//number of threads per block
     basicRun<<<gridSize,blockSize>>>(dev_a,dev_z);
 
     cudaMemcpy(z,dev_z,sizeof(double)*F,cudaMemcpyDeviceToHost);
